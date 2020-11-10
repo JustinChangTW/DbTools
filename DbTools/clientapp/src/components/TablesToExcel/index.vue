@@ -8,7 +8,7 @@
             </li>
         </ul>
         <keep-alive>
-            <component :is="currectStep"></component>
+            <component :is="currectStep" @previous="previous($event)" @next="next($event)"></component>
         </keep-alive>
     </div>
 </div>
@@ -33,14 +33,24 @@ export default {
         return {
             steps:['Step01','Step02','Step03'],
             tabActive:0,
-            currectStep:"Step01"
+            currectStep:"Step01",
+            stepData:{},
         }
     },
     methods:{
         changTag:function(index){
-            this.tabActive=index
-            this.currectStep=this.steps[index]
-
+            this.tabActive=index>=0?index>=this.steps.length?this.steps.length-1:index:0;
+            this.currectStep=this.steps[this.tabActive]
+        },
+        previous:function(data){
+            console.log(data)
+            this.changTag(--this.tabActive)
+            this.stepData = Object.assign(this.stepData,data)
+        },
+        next:function(data){
+            console.log(data)
+            this.changTag(++this.tabActive)
+            this.stepData = Object.assign(this.stepData,data)
         }
     }
 }
