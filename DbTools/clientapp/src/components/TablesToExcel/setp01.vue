@@ -30,13 +30,13 @@
                 <button  class="btn btn-primary mb-3" @click.prevent="connectionTest">測試連線</button>
             </div>
         </form>
-        <div class="btn btn-dark previous" disabled @click="previous()">上一頁</div>
-        <div class="btn btn-success next" @click="next()">下一頁</div>
-        
+        <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next" ></ChangTabsButton>
     </div>
 </template>
 
 <script>
+import ChangTabsButton from '../Share/ChangTabsButton'
+
 export default {
         name: 'setp01',
         data:function(){
@@ -51,42 +51,28 @@ export default {
                 }
             }
         },
+        computed: {
+            canNextPage(){
+                return {checked:this.form.check,message:"尚未連線"}
+            },
+        },
+        components:{
+            'ChangTabsButton':ChangTabsButton,
+        },
         methods:{
             connectionTest:function(){
                 this.form.check = true;
             },
-            previous:function(){
-                this.$emit('previous', this.form);
+            previous(){
+                this.$emit('previous',this.form)
             },
-            next:function(){
-                if(!this.form.check){
-                    alert("尚未連線測試成功")
-                }else{
-                    this.$emit('next',  this.form);
-                }
+            next(){
+                this.$emit('next',this.form)
             }
         },
 }
 </script>
 
 <style scoped>
-.previous ,.next{
-    display: inline-block;
-    position: fixed;
-    width:50%;
-    text-align: center;
-    line-height: 30px;
-    color:white;
-}
 
-.previous{
-    bottom: 5px;
-    left: 0px;
-    border: 1px solid;
-}
-.next{
-    bottom: 5px;
-    right: 0px;
-    border: 1px solid;
-}
 </style>

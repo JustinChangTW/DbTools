@@ -16,12 +16,12 @@
                 </tr>
             </tbody>
         </table>
-        <div class="btn btn-dark previous" disabled @click="previous()">上一頁</div>
-        <div class="btn btn-success next" @click="next()">下一頁</div>
+        <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next" ></ChangTabsButton>
     </div>
 </template>
 
 <script>
+import ChangTabsButton from '../Share/ChangTabsButton'
 export default {
         name: 'setp02',
         data:function(){
@@ -31,6 +31,14 @@ export default {
                     tables:[]
                 },
             }
+        },
+        components:{
+            'ChangTabsButton':ChangTabsButton,
+        },
+        computed: {
+            canNextPage(){
+                return {checked:this.form.tables.filter(x=>x.checked==true).length>0,message:"尚未選擇Table"}
+            },
         },
         mounted:function(){
             this.form.tables.push({id:1,tableName:"abc",checked:false})
@@ -46,6 +54,9 @@ export default {
             previous:function(){
                 this.$emit('previous', this.form);
             },
+            selectTable(){
+                
+            },
             next:function(){
                 this.$emit('next',  this.form);
             }
@@ -54,23 +65,5 @@ export default {
 </script>
 
 <style scoped>
-    .previous ,.next{
-        display: inline-block;
-        position: fixed;
-        width:50%;
-        text-align: center;
-        line-height: 30px;
-        color:white;
-    }
 
-    .previous{
-        bottom: 5px;
-        left: 0px;
-        border: 1px solid;
-    }
-    .next{
-        bottom: 5px;
-        right: 0px;
-        border: 1px solid;
-    }
 </style>
