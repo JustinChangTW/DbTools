@@ -72,7 +72,7 @@ export default {
 <style scoped>
 .previous ,.next{
     display: inline-block;
-    position: relative;
+    position: fixed;
     width:50%;
     text-align: center;
     line-height: 30px;
@@ -80,12 +80,12 @@ export default {
 }
 
 .previous{
-    bottom: 0px;
+    bottom: 5px;
     left: 0px;
     border: 1px solid;
 }
 .next{
-    bottom: 0px;
+    bottom: 5px;
     right: 0px;
     border: 1px solid;
 }

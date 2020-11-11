@@ -2,7 +2,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs nav-fill">
             <li class="nav-item" v-for="(step,index) in steps" :key="index">
                 <a class="nav-link" :class="{active:tabActive==index}" href="#" @click="changTag(index)">{{step}}</a>
             </li>
