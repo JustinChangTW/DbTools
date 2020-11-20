@@ -1,12 +1,36 @@
 <template>
     <div>
-        <h1></h1>
+        <h1>產生Excel</h1>
+        
+        <button  class="btn btn-primary mb-3" @click.prevent="connectionTest">產生Excel</button>
+        
+        <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next" ></ChangTabsButton>
     </div>
 </template>
 
 <script>
+import ChangTabsButton from '../Share/ChangTabsButton'
 export default {
         name: 'setp03',
+        components:{
+            'ChangTabsButton':ChangTabsButton,
+        },
+        methods:{
+            checkedAll(){
+                this.form.tables.forEach(x=>{
+                    x.checked = !this.form.checkedAll
+                })
+            },
+            previous:function(){
+                this.$emit('previous', this.form);
+            },
+            selectTable(){
+                
+            },
+            next:function(){
+                this.$emit('next',  this.form);
+            }
+        },
 }
 </script>
 
