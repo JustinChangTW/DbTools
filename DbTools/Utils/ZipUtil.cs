@@ -1,18 +1,16 @@
-﻿using System;
+﻿using DbTools.Extensions;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Compression;
-using DbTools.Extensions;
-using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace DbTools.Utils
 {
     public class ZipUtil : IZipUtil
     {
-        private ILogger<ZipUtil> logger;
+        private readonly ILogger<ZipUtil> logger;
         public ZipUtil(ILogger<ZipUtil> logger)
         {
             this.logger = logger;

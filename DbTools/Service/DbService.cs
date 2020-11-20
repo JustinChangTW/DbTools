@@ -1,15 +1,11 @@
 ﻿using DbTools.Utils;
 using DbTools.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DbTools.Service
 {
     public class DbService : IDbService
     {
-        private IDbUtil _dbUtil;
+        private readonly IDbUtil _dbUtil;
 
         public DbService(IDbUtil dbUtil)
         {

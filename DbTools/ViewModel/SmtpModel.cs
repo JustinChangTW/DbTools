@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DbTools.Models
+﻿namespace DbTools.Models
 {
     public class SmtpModel
     {

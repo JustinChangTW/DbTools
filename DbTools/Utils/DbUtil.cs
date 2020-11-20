@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Text;
 
 namespace DbTools.Utils
 {
     public class DbUtil : IDbUtil
     {
         private IDbConnection _connection;
-        private ILogger<DbUtil> _logger;
+        private readonly ILogger<DbUtil> _logger;
 
         public string connectionString { get; set; }
         public string dbType { get; set; }
@@ -40,13 +39,13 @@ namespace DbTools.Utils
         }
 
         
-        public string GenerateConnectionString(DbConnectionModel dbConnection)
+        public string GenerateConnectionString(DbConnectionModel form)
         {
-            string connectionString = "";
-            switch (dbConnection.DbType)
+            string connectionString;
+            switch (form.DbType)
             {
                 case "MSSQL":
-                    connectionString = $"Data Source={dbConnection.DbServer};Initial Catalog={dbConnection.DbName};Persist Security Info=True;User ID={dbConnection.User};Password={dbConnection.Password}";
+                    connectionString = $"Data Source={form.DbServer};Initial Catalog={form.DbName};Persist Security Info=True;User ID={form.User};Password={form.Password}";
                     break;
                 default:
                     connectionString = "";
@@ -77,7 +76,6 @@ namespace DbTools.Utils
         {
             _logger.LogInformation($@"GetList sqlString={sqlString}");
             var list = new List<T>();
-            var dba = _connection;
             using (var db = _connection as DbConnection)
             {
                 IEnumerable<T> ts = null;

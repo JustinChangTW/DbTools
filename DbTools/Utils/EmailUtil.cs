@@ -1,21 +1,14 @@
 ﻿using DbTools.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DbTools.Utils
 {
     public class EmailUtil : IEmailUtil
     {
-        public SmtpModel smtpModel;
-        public MailMessage mailMessage;
+        SmtpModel smtpModel;
+        MailMessage mailMessage;
         private ILogger<EmailUtil> logger;
         public EmailUtil(ILogger<EmailUtil> logger) { this.logger = logger; }
 
