@@ -36,7 +36,7 @@
 
 <script>
 import ChangTabsButton from '../Share/ChangTabsButton'
-
+import axios from 'axios';
 export default {
         name: 'setp01',
         data:function(){
@@ -54,7 +54,7 @@ export default {
         computed: {
             canNextPage(){
                 return {checked:this.form.check,message:"尚未連線"}
-            },
+            }
         },
         components:{
             'ChangTabsButton':ChangTabsButton,
@@ -62,6 +62,15 @@ export default {
         methods:{
             connectionTest:function(){
                 this.form.check = true;
+                axios.post('/api/DbConnectionTest', 
+                    this.form
+                )
+                .then(function (response) {
+                    this.form.check = response.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             },
             previous(){
                 this.$emit('previous',this.form)
