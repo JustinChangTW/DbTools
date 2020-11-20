@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DbTools.ViewModel;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
@@ -27,6 +28,7 @@ namespace DbTools.Utils
         public void SetConnection()
         {
             _logger.LogInformation($@"SetConnection dbType == {dbType}");
+            if (String.IsNullOrEmpty(connectionString)) throw new Exception("參數輸入不正確");
             if (dbType == "MYSQL")
             { 
                 _connection = MySqlConnection(connectionString);
@@ -37,22 +39,21 @@ namespace DbTools.Utils
             }
         }
 
-        //private IDbConnection Connection
-        //{
-        //    get
-        //    {
-        //        if (dbType == "MsSql")
-        //        {
-        //            _connection = SqlConnection(connectionString);
-
-        //        }
-        //        else if (dbType == "MySql")
-        //        {
-        //            _connection = MySqlConnection(connectionString);
-        //        }
-        //        return _connection;
-        //    }
-        //}
+        
+        public string GenerateConnectionString(DbConnectionModel dbConnection)
+        {
+            string connectionString = "";
+            switch (dbConnection.DbType)
+            {
+                case "MSSQL":
+                    connectionString = $"Data Source={dbConnection.DbServer};Initial Catalog={dbConnection.DbName};Persist Security Info=True;User ID={dbConnection.User};Password={dbConnection.Password}";
+                    break;
+                default:
+                    connectionString = "";
+                    break;
+            }
+            return connectionString;
+        }
 
 
         private SqlConnection SqlConnection(string connectionString)

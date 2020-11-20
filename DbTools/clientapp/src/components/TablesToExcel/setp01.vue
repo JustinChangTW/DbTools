@@ -61,15 +61,20 @@ export default {
         },
         methods:{
             connectionTest:function(){
-                this.form.check = true;
+                var form = this.form
+                form.check = false
                 axios.post('/api/DbConnectionTest', 
                     this.form
                 )
                 .then(function (response) {
-                    this.form.check = response.data;
+                    form.check = response.data
+                    if(!form.check )  {
+                        alert("連線失敗，請確認參數，謝謝")
+                    }
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    console.log(error)
+                    alert(error)
                 });
             },
             previous(){
