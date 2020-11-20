@@ -12,8 +12,19 @@
 import ChangTabsButton from '../Share/ChangTabsButton'
 export default {
         name: 'setp03',
+        data:function(){
+            return{
+                form:{
+                },
+            }
+        },
         components:{
             'ChangTabsButton':ChangTabsButton,
+        },
+        computed: {
+            canNextPage(){
+                return {checked:false,message:"已經是最後一頁了"}
+            },
         },
         methods:{
             checkedAll(){
