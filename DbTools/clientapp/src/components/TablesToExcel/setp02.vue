@@ -23,10 +23,12 @@
 </template>
 
 <script>
-import ChangTabsButton from '../Share/ChangTabsButton'
+    import ChangTabsButton from '../Share/ChangTabsButton'
+    import axios from 'axios'
     export default {
         props: {
             tables: Array,
+            stepData: Object,
         },
         name: 'setp02',
         data: function () {
@@ -47,7 +49,6 @@ import ChangTabsButton from '../Share/ChangTabsButton'
         },
         mounted:function(){
             this.getTables()
-            this.form.tables=this.tables
         },
         methods: {
             checkedAll(){
@@ -55,8 +56,21 @@ import ChangTabsButton from '../Share/ChangTabsButton'
                     x.check = !this.form.checkedAll
                 })
             },
-            getTables(){
-                this.$emit('getTables')
+            getTables() {
+                let stepData = this.stepData
+                let form = this.form
+                console.log(stepData)
+                axios.post('/api/Table',
+                    stepData
+                )
+                .then(function (response) {
+                    //form.check = response.data
+                    form.tables = response.data
+                })
+                .catch(function (error) {
+                    console.log(error)
+                    alert(error)
+                });
             },
             previous:function(){
                 this.$emit('previous', this.form);
