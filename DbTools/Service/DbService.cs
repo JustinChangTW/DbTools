@@ -1,5 +1,6 @@
 ﻿using DbTools.Utils;
 using DbTools.ViewModel;
+using System.Collections.Generic;
 
 namespace DbTools.Service
 {
@@ -25,6 +26,22 @@ namespace DbTools.Service
             {
                 return false;
             }
+        }
+
+        public List<TableModel> GetTables(DbConnectionModel form)
+        {
+
+            if (!ConnectionTest(form)) return new List<TableModel>();
+
+            var sql = @"SELECT 
+OBJECT_ID(TABLE_NAME) ID,
+Table_Catalog DbName,
+Table_Name TableName,
+Table_Schema TableSchema,
+Table_Type TableType
+FROM INFORMATION_SCHEMA.TABLES";
+            return _dbUtil.GetList<TableModel>(sql);
+
         }
     }
 }

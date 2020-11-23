@@ -6,12 +6,14 @@
             <thead>
                 <tr>
                     <th class="text-center"><input type="checkbox" name="all" v-model="form.checkedAll" @click="checkedAll"></th>
+                    <th class="text-center">資料庫名稱</th>
                     <th class="text-center">表格名稱</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="table in form.tables" :key="table.id">
-                    <td class="text-center"><input type="checkbox" v-model="table.checked"> </td>
+                    <td class="text-center"><input type="checkbox" v-model="table.check"> </td>
+                    <td>{{table.dbName}}</td>
                     <td>{{table.tableName}}</td>
                 </tr>
             </tbody>
@@ -22,13 +24,16 @@
 
 <script>
 import ChangTabsButton from '../Share/ChangTabsButton'
-export default {
+    export default {
+        props: {
+            tables: Array,
+        },
         name: 'setp02',
-        data:function(){
-            return{
+        data: function () {
+            return {
                 form:{
-                    checkedAll:false,
-                    tables:[]
+                    checkedAll: false,
+                    tables: this.tables
                 },
             }
         },
@@ -37,19 +42,21 @@ export default {
         },
         computed: {
             canNextPage(){
-                return {checked:this.form.tables.filter(x=>x.checked==true).length>0,message:"尚未選擇Table"}
+                return {checked:this.form.tables.filter(x=>x.check==true).length>0,message:"尚未選擇Table"}
             },
         },
         mounted:function(){
-            this.form.tables.push({id:1,tableName:"abc",checked:false})
-            this.form.tables.push({id:2,tableName:"def",checked:false})
-            this.form.tables.push({id:3,tableName:"ght",checked:false})
+            this.getTables()
+            this.form.tables=this.tables
         },
-        methods:{
+        methods: {
             checkedAll(){
                 this.form.tables.forEach(x=>{
-                    x.checked = !this.form.checkedAll
+                    x.check = !this.form.checkedAll
                 })
+            },
+            getTables(){
+                this.$emit('getTables')
             },
             previous:function(){
                 this.$emit('previous', this.form);

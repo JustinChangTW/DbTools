@@ -8,7 +8,12 @@
             </li>
         </ul>
         <keep-alive>
-            <component :is="currectStep" @previous="previous($event)" @next="next($event)"></component>
+            <component
+            :is="currectStep" 
+            :tables="stepData.tables||[]"
+            @previous="previous($event)" 
+            @next="next($event)" 
+            @getTables="getTables()"></component>
         </keep-alive>
     </div>
 </div>
@@ -19,6 +24,7 @@
 import Step01 from './setp01'
 import Step02 from './setp02'
 import Step03 from './setp03'
+import axios from 'axios';
 export default {
     name: 'TablesToExcel',
     props: {
@@ -34,7 +40,8 @@ export default {
             steps:['Step01','Step02','Step03'],
             tabActive:0,
             currectStep:"Step01",
-            stepData:{},
+            stepData: {
+                tables: [],},
         }
     },
     methods:{
@@ -51,6 +58,23 @@ export default {
             console.log(data)
             this.changTag(++this.tabActive)
             this.stepData = Object.assign(this.stepData,data)
+        },
+        getTables(){
+            let form = this.stepData
+            axios.post('/api/Table', 
+                this.stepData
+            )
+            .then(function (response) {
+                //form.check = response.data
+                form.tables = response.data
+                if(!form.check )  {
+                    alert("連線失敗，請確認參數，謝謝")
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+                alert(error)
+            });
         }
     }
 }
