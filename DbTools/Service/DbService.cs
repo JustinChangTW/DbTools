@@ -1,6 +1,10 @@
-﻿using DbTools.Utils;
+﻿using ClosedXML.Excel;
+using DbTools.Utils;
 using DbTools.ViewModel;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace DbTools.Service
 {
@@ -26,6 +30,38 @@ namespace DbTools.Service
             {
                 return false;
             }
+        }
+
+        public MemoryStream GetTableDataToExcel(StepDataModel form)
+        {
+            MemoryStream stream = new MemoryStream();
+            string filename = $"{form.DbName}-{DateTime.Now.ToString()}";
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                foreach (var table in form.Tables.Where(x => x.Check).ToList())
+                {
+                    if (ConnectionTest(form))
+                    {
+                        var data = _dbUtil.GetDataTable($"SELECT * FROM {table.TableName}");
+                        data.TableName = table.TableName;
+
+                        if (data != null)
+                        {
+                            //Add DataTable in worksheet  
+                            wb.Worksheets.Add(data);
+                        }
+
+                    }
+
+                }
+                using (stream = new MemoryStream())
+                {
+                    wb.SaveAs(stream);
+                    //Return xlsx Excel File  
+                    //return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+            }
+            return stream;
         }
 
         public List<TableModel> GetTables(DbConnectionModel form)

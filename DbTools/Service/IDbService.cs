@@ -1,5 +1,6 @@
 ﻿using DbTools.ViewModel;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DbTools.Service
 {
@@ -7,5 +8,6 @@ namespace DbTools.Service
     {
         bool ConnectionTest(DbConnectionModel form);
         List<TableModel> GetTables(DbConnectionModel form);
+        MemoryStream GetTableDataToExcel(StepDataModel form);
     }
 }

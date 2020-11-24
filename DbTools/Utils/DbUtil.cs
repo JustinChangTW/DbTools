@@ -96,6 +96,7 @@ namespace DbTools.Utils
             return list;
         }
 
+
         public List<T> GetList<T>(string sqlString)
         {
             return GetList<T>(sqlString, null, CommandType.Text);
@@ -109,6 +110,43 @@ namespace DbTools.Utils
             }
 
             return GetList<T>(sqlString, param);
+        }
+
+
+        public DataTable GetDataTable(string sqlString, object param = null, CommandType? commandType = CommandType.Text, int? commandTimeout = 180)
+        {
+            var dataTable = new DataTable();
+            using (var db = _connection as DbConnection)
+            {
+                if (null == param)
+                {
+                    var dataReader = db.ExecuteReader(sqlString);
+                    dataTable = new DataTable();
+                    dataTable.Load(dataReader);
+                }
+                else
+                {
+                    var dataReader = db.ExecuteReader(sqlString, param);
+                    dataTable = new DataTable();
+                    dataTable.Load(dataReader);
+                }
+            }
+            return dataTable;
+        }
+
+        public DataTable GetDataTable(string sqlString)
+        {
+            return GetDataTable(sqlString, null, CommandType.Text);
+        }
+
+        public DataTable GetDataTable(string sqlString, object param)
+        {
+            if (null == param)
+            {
+                return GetDataTable(sqlString);
+            }
+
+            return GetDataTable(sqlString, param);
         }
         #endregion
 

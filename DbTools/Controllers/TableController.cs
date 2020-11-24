@@ -19,7 +19,7 @@ namespace DbTools.Controllers
         {
             _dbService = dbService;
         }
-        public JsonResult Post([FromBody] DbConnectionModel form)
+        public JsonResult Post([FromBody] StepDataModel form)
         {
             var result = _dbService.GetTables(form);
 
