@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DbTools.Extensions;
 using DbTools.Utils;
 using DbTools.ViewModel;
 using System;
@@ -42,9 +43,9 @@ namespace DbTools.Service
                 {
                     if (ConnectionTest(form))
                     {
-                        var data = _dbUtil.GetDataTable($"SELECT * FROM [{table.TableName}]");
+                        var data = _dbUtil.GetDataTable($"SELECT * FROM [{table.TableSchema}].[{table.TableName}]");
                         data.TableName = table.TableName;
-
+                        data.ClearField(3000);
                         if (data != null)
                         {
                             try

@@ -7,17 +7,15 @@
                 <a class="nav-link" :class="{active:tabActive==index}" href="#" @click="changTag(index)">{{step}}</a>
             </li>
         </ul>
-        <keep-alive>
-            <component
-            :is="currectStep" 
-            :stepData="stepData"
-            :tables="stepData.tables||[]"
-            @previous="previous($event)" 
-            @next="next($event)" 
-            @getTables="getTables()"
-            @loading="loading()"
-            @loaded="loaded()"></component>
-        </keep-alive>
+        <component
+        :is="currectStep" 
+        :stepData="stepData"
+        :tables="stepData.tables||[]"
+        @previous="previous($event)" 
+        @next="next($event)" 
+        @getTables="getTables()"
+        @loading="loading()"
+        @loaded="loaded()"></component>
     </div>
     <div class="load" :class="{hidden:!isload}">
         <svg width="3em" height="3em" viewBox="0 0 16 16" class="loading bi bi-arrow-repeat" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -100,6 +98,7 @@ export default {
         animation-name:loading;
         animation-iteration-count: infinite;
         animation-duration:1s;
+        transform: translate(1.5em,1.5em);
     }
     @keyframes loading{
     from{

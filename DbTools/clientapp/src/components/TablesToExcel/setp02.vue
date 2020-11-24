@@ -19,7 +19,7 @@
                 <tr v-for="table in filterTables" :key="table.id">
                     <td class="text-center"><input type="checkbox" v-model="table.check"> </td>
                     <td>{{table.dbName}}</td>
-                    <td>{{table.tableName}}</td>
+                    <td>{{table.tableSchema+'.'+table.tableName}}</td>
                 </tr>
             </tbody>
         </table>
