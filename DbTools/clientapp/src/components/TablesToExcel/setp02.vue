@@ -74,17 +74,22 @@
             getTables() {
                 let stepData = this.stepData
                 let form = this.form
+                //let emit = this.$emit
                 console.log(stepData)
+                
+                this.$emit("loading")
                 axios.post('/api/Table',
                     stepData
                 )
                 .then(function (response) {
-                    //form.check = response.data
                     form.tables = response.data
                 })
                 .catch(function (error) {
                     console.log(error)
                     alert(error)
+                }).finally(()=>{
+                    console.log(this)
+                    this.$emit("loaded")
                 });
             },
             previous:function(){

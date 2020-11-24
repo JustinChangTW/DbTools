@@ -36,6 +36,7 @@
                 let stepData = this.stepData
                 let form = this.form
                 console.log(stepData)
+                this.$emit("loading")
                 axios.post('/api/ExportFile', stepData, { responseType: 'blob' })
                 .then(function (response) {
                     form.tables = response.data
@@ -57,6 +58,9 @@
                 .catch(function (error) {
                     console.log(error)
                     alert(error)
+                }).finally(()=>{
+                    console.log(this)
+                    this.$emit("loaded")
                 });
             },
             previous:function(){
