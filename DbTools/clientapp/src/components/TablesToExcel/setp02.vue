@@ -1,7 +1,12 @@
 <template>
     <div>
         <h1>選擇要匯出的資料表</h1>
-        
+        <form class="row g-3">
+            <div class="mb-3">
+                <label for="filter" class="visually-hidden">過濾資料表</label>
+                <input type="text"  class="form-control" id="filter" placeholder="過濾資料表" v-model="filter">
+            </div>
+        </form>
         <table class="table table-bordered  table-hover">
             <thead>
                 <tr>
@@ -11,7 +16,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="table in form.tables" :key="table.id">
+                <tr v-for="table in filterTables" :key="table.id">
                     <td class="text-center"><input type="checkbox" v-model="table.check"> </td>
                     <td>{{table.dbName}}</td>
                     <td>{{table.tableName}}</td>
@@ -33,6 +38,7 @@
         name: 'setp02',
         data: function () {
             return {
+                filter:"",
                 form:{
                     checkedAll: false,
                     tables: this.tables
@@ -45,6 +51,15 @@
         computed: {
             canNextPage(){
                 return {checked:this.form.tables.filter(x=>x.check==true).length>0,message:"尚未選擇Table"}
+            },
+            filterTables(){
+                var filter = this.filter.toUpperCase()
+                var tables = this.form.tables
+                
+                return tables.filter(x=>{
+                    console.log(filter)
+                    return x.tableName.toUpperCase().indexOf(filter) > -1
+                })
             },
         },
         mounted:function(){
