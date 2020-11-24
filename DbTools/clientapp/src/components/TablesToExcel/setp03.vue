@@ -11,6 +11,7 @@
 <script>
     import ChangTabsButton from '../Share/ChangTabsButton'
     import axios from 'axios'
+    var  moment  =  require('moment');
     export default {
         props: {
             stepData: Object,
@@ -45,7 +46,7 @@
                         let a = document.createElement('a')
                         var today = new Date();
                         today.toISOString().substring(0, 10);
-                        a.download = stepData.dbName + today.toISOString().substring(0, 10)+'.xlsx' //filename
+                        a.download = stepData.dbName +'-'+ moment().format('YYYYMMDDHHmmss') +'.xlsx' //filename
                         a.href = e.target.result
                         document.body.appendChild(a)
                         a.click()

@@ -34,8 +34,8 @@ namespace DbTools.Service
 
         public MemoryStream GetTableDataToExcel(StepDataModel form)
         {
-            MemoryStream stream = new MemoryStream();
-            string filename = $"{form.DbName}-{DateTime.Now.ToString()}";
+            MemoryStream stream = null;
+            //string filename = $"{form.DbName}-{DateTime.Now.ToString()}";
             using (XLWorkbook wb = new XLWorkbook())
             {
                 foreach (var table in form.Tables.Where(x => x.Check).ToList())
@@ -47,8 +47,15 @@ namespace DbTools.Service
 
                         if (data != null)
                         {
-                            //Add DataTable in worksheet  
-                            wb.Worksheets.Add(data);
+                            try
+                            {
+                                wb.Worksheets.Add(data);
+                                wb.Worksheets.Worksheet(data.TableName).Columns().AdjustToContents();
+                            }
+                            catch(Exception ex)
+                            {
+                                Console.WriteLine("ERROR:" + ex.Message);
+                            }
                         }
 
                     }
