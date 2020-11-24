@@ -42,7 +42,7 @@ namespace DbTools.Service
                 {
                     if (ConnectionTest(form))
                     {
-                        var data = _dbUtil.GetDataTable($"SELECT * FROM {table.TableName}");
+                        var data = _dbUtil.GetDataTable($"SELECT * FROM [{table.TableName}]");
                         data.TableName = table.TableName;
 
                         if (data != null)
