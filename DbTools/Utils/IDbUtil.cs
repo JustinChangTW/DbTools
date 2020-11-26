@@ -26,5 +26,6 @@ namespace DbTools.Utils
         bool Update(string sqlString, object param, CommandType commandType = CommandType.Text, int? commandTimeOut = 5);
 
         bool Delete(string sqlString, object param, CommandType commandType = CommandType.Text, int? commandTimeOut = 5);
+
     }
 }

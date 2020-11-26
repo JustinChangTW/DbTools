@@ -199,5 +199,21 @@ namespace DbTools.Extensions
             }
             return data;
         }
+
+        public static List<Dictionary<string,object>> TranDictionarys(this DataTable data)
+        {
+            List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+            foreach (DataRow row in data.Rows)
+            {
+                var dir = new Dictionary<string, object>();
+
+                foreach (DataColumn column in data.Columns)
+                {
+                    dir.Add($"[{column}]", row[column]);
+                }
+                result.Add(dir);
+            }
+            return result;
+        }
     }
 }

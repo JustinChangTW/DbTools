@@ -1,10 +1,12 @@
 <template>
-    <div>
+    <div >
         <h1>產生Excel</h1>
-        
-        <button  class="btn btn-primary mb-3" @click.prevent="exportFile">產生Excel</button>
-        
-        <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next" ></ChangTabsButton>
+
+        <button class="btn btn-primary mb-3 m-3" @click.prevent="exportFile">產生Excel</button>
+
+        <button class="btn btn-primary mb-3 m-3" @click.prevent="exportInsert">產生Insert語法</button>
+
+        <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next"></ChangTabsButton>
     </div>
 </template>
 
@@ -62,6 +64,37 @@
                     console.log(this)
                     this.$emit("loaded")
                 });
+            },
+            exportInsert() {
+                let stepData = this.stepData
+                let form = this.form
+                console.log(stepData)
+                this.$emit("loading")
+                axios.post('/api/ExportInsert', stepData, { responseType: 'blob' })
+                    .then(function (response) {
+                        form.tables = response.data
+                        let blob = response.data
+                        let reader = new FileReader()
+                        reader.readAsDataURL(blob)
+                        reader.onload = (e) => {
+                            let a = document.createElement('a')
+                            var today = new Date();
+                            today.toISOString().substring(0, 10);
+                            a.download = stepData.dbName + '-' + moment().format('YYYYMMDDHHmmss') + '.txt' //filename
+                            a.href = e.target.result
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                        alert(error)
+                    }).finally(() => {
+                        console.log(this)
+                        this.$emit("loaded")
+                    });
             },
             previous:function(){
                 this.$emit('previous', this.form);

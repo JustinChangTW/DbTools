@@ -9,5 +9,6 @@ namespace DbTools.Service
         bool ConnectionTest(DbConnectionModel form);
         List<TableModel> GetTables(DbConnectionModel form);
         MemoryStream GetTableDataToExcel(StepDataModel form);
+        MemoryStream GetTableDataToInsert(StepDataModel form);
     }
 }
