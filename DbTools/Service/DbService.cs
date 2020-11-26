@@ -114,6 +114,8 @@ Go"+"\n\n");
             }
         }
 
+
+
         public List<TableModel> GetTables(DbConnectionModel form)
         {
 
@@ -157,5 +159,82 @@ FROM INFORMATION_SCHEMA.TABLES";
             sb.Append(");\r\n");
             return sb.ToString();
         }
+
+        public MemoryStream GetTableDataToEntityClass(StepDataModel form)
+        {
+            return ExportEntityClass(form, x => _dbUtil.ExecuteReader($"SELECT * FROM [{x.TableSchema}].[{x.TableName}] "));
+        }
+
+        private MemoryStream ExportEntityClass(StepDataModel form, Func<TableModel, DataTable> func)
+        {
+            var stream = new MemoryStream();
+
+            using (var sw = new StreamWriter(stream, new UnicodeEncoding()))
+            {
+                foreach (var table in form.Tables.Where(x => x.Check).ToList())
+                {
+                    if (ConnectionTest(form))
+                    {
+                        var data = func(table);
+                        sw.Write(GenEntityClass(data,table.TableName));
+                    }
+                }
+            }
+
+
+           return stream;
+        }
+
+        private  string GenEntityClass(DataTable schema,string className)
+        {
+            var builder = new StringBuilder();
+            foreach (DataRow row in schema.Rows)
+            {
+                if (string.IsNullOrWhiteSpace(builder.ToString()))
+                {
+                    var tableName = string.IsNullOrWhiteSpace(className) ? row["BaseTableName"] as string : className;
+                    builder.AppendFormat("public class {0}{1}", tableName, Environment.NewLine);
+                    builder.AppendLine("{");
+                }
+
+
+                var type = (Type)row["DataType"];
+                var name = TypeAliases.ContainsKey(type) ? TypeAliases[type] : type.Name;
+                var isNullable = (bool)row["AllowDBNull"] && NullableTypes.Contains(type);
+                var collumnName = (string)row["ColumnName"];
+                var isKey = (bool)row["IsKey"] && NullableTypes.Contains(type);
+                if(isKey) builder.AppendLine("\t[Key]");
+                builder.AppendLine(string.Format("\tpublic {0}{1} {2} {{ get; set; }}", name, isNullable ? "?" : string.Empty, collumnName));
+                builder.AppendLine();
+            }
+
+            builder.AppendLine("}");
+            builder.AppendLine();
+            return builder.ToString();
+        }
+
+        private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string> {
+            { typeof(int), "int" },
+            { typeof(short), "short" },
+            { typeof(byte), "byte" },
+            { typeof(byte[]), "byte[]" },
+            { typeof(long), "long" },
+            { typeof(double), "double" },
+            { typeof(decimal), "decimal" },
+            { typeof(float), "float" },
+            { typeof(bool), "bool" },
+            { typeof(string), "string" }
+        };
+
+        private static readonly HashSet<Type> NullableTypes = new HashSet<Type> {
+            typeof(int),
+            typeof(short),
+            typeof(long),
+            typeof(double),
+            typeof(decimal),
+            typeof(float),
+            typeof(bool),
+            typeof(DateTime)
+        };
     }
 }

@@ -10,5 +10,6 @@ namespace DbTools.Service
         List<TableModel> GetTables(DbConnectionModel form);
         MemoryStream GetTableDataToExcel(StepDataModel form);
         MemoryStream GetTableDataToInsert(StepDataModel form);
+        MemoryStream GetTableDataToEntityClass(StepDataModel form);
     }
 }

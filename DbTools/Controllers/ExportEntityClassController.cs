@@ -12,20 +12,20 @@ namespace DbTools.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExportInsertController : ControllerBase
+    public class ExportEntityClassController : ControllerBase
     {
         private readonly IDbService _dbService;
 
-        public ExportInsertController(IDbService dbService)
+        public ExportEntityClassController(IDbService dbService)
         {
             _dbService = dbService;
         }
 
         public IActionResult Post([FromBody] StepDataModel form)
         {
-            MemoryStream result = _dbService.GetTableDataToInsert(form); 
+            MemoryStream result = _dbService.GetTableDataToEntityClass(form);
 
-            return File(result.ToArray(),"text/plain");
+            return File(result.ToArray(), "text/plain");
         }
     }
 }

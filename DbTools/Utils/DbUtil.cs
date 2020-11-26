@@ -211,6 +211,16 @@ namespace DbTools.Utils
 
             return intResult > 0;
         }
+
+        public DataTable ExecuteReader(string sqlString)
+        {
+            IDataReader dataReader;
+            var db = _connection as DbConnection;
+            var cmd = db.CreateCommand();
+            cmd.CommandText = sqlString;
+            dataReader = cmd.ExecuteReader(CommandBehavior.KeyInfo | CommandBehavior.SingleRow);
+            return dataReader.GetSchemaTable();
+        }
         #endregion
     }
 }
