@@ -93,7 +93,7 @@ namespace DbTools.Service
                         if (data != null)
                         {
                             sw.Write($@"
-/*[{table.DbName}].[{table.TableSchema}].[{table.TableName}]                  */
+/*[{table.TableCatalog}].[{table.TableSchema}].[{table.TableName}]                  */
 SET IDENTITY_INSERT [{table.TableSchema}].[{table.TableName}] ON
 Go
 ");
@@ -121,15 +121,42 @@ Go"+"\n\n");
 
             if (!ConnectionTest(form)) return new List<TableModel>();
 
-            var sql = @"SELECT 
-OBJECT_ID(TABLE_NAME) ID,
-Table_Catalog DbName,
-Table_Name TableName,
-Table_Schema TableSchema,
-Table_Type TableType
+            var sql = @"
+SELECT 
+    OBJECT_ID(TABLE_NAME) ID,
+    Table_Catalog TableCatalog,
+    Table_Name TableName,
+    Table_Schema TableSchema,
+    Table_Type TableType,
+    ISNULL((SELECT TOP(1) ex.value  
+            FROM sys.extended_properties ex 
+            WHERE OBJECT_ID(TABLE_NAME) = ex.major_id AND ex.minor_id=0 AND  name = 'MS_Description'),TABLE_NAME) N'Description'
 FROM INFORMATION_SCHEMA.TABLES";
             return _dbUtil.GetList<TableModel>(sql);
 
+        }
+
+        public List<ColumnsModel> GetColumns(TableModel table)
+        {
+            var sql = $@"
+SELECT 
+	TABLE_CATALOG TableCatalog,
+	TABLE_SCHEMA TableSchema,
+	TABLE_NAME TableName,
+	COLUMN_NAME ColumnName,
+	ORDINAL_POSITION OrdinalPosition,
+	IS_NULLABLE IsNullable,
+	DATA_TYPE DataType,
+	CHARACTER_MAXIMUM_LENGTH CharacterMaximumLength,
+	CHARACTER_OCTET_LENGTH CharacterOctetLength,
+	CHARACTER_SET_NAME CharacterSetName,
+	COLLATION_CATALOG CollationName,
+	ISNULL((SELECT TOP(1) ex.value 
+			FROM sys.extended_properties ex 
+			WHERE OBJECT_ID(TABLE_NAME) = ex.major_id AND ex.minor_id=ORDINAL_POSITION AND  name = 'MS_Description'),COLUMN_NAME) N'Description'
+from INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME = @TableName";
+            return _dbUtil.GetList<ColumnsModel>(sql, table);
         }
 
 
@@ -162,10 +189,11 @@ FROM INFORMATION_SCHEMA.TABLES";
 
         public MemoryStream GetTableDataToEntityClass(StepDataModel form)
         {
-            return ExportEntityClass(form, x => _dbUtil.ExecuteReader($"SELECT * FROM [{x.TableSchema}].[{x.TableName}] "));
+            
+            return ExportEntityClass(form, x => GetColumns(x));
         }
 
-        private MemoryStream ExportEntityClass(StepDataModel form, Func<TableModel, DataTable> func)
+        private MemoryStream ExportEntityClass(StepDataModel form, Func<TableModel, List<ColumnsModel>> func)
         {
             var stream = new MemoryStream();
 
@@ -176,7 +204,7 @@ FROM INFORMATION_SCHEMA.TABLES";
                     if (ConnectionTest(form))
                     {
                         var data = func(table);
-                        sw.Write(GenEntityClass(data,table.TableName));
+                        sw.Write(GenEntityClass(data));
                     }
                 }
             }
@@ -185,27 +213,26 @@ FROM INFORMATION_SCHEMA.TABLES";
            return stream;
         }
 
-        private  string GenEntityClass(DataTable schema,string className)
+        private  string GenEntityClass(List<ColumnsModel> columns)
         {
             var builder = new StringBuilder();
-            foreach (DataRow row in schema.Rows)
+            foreach (var column in columns)
             {
                 if (string.IsNullOrWhiteSpace(builder.ToString()))
                 {
-                    var tableName = string.IsNullOrWhiteSpace(className) ? row["BaseTableName"] as string : className;
+                    var tableName = column.TableName;
                     builder.AppendFormat("public class {0}{1}", tableName, Environment.NewLine);
                     builder.AppendLine("{");
                 }
 
+                var typeName = SqlTypeMap.ContainsKey(column.DataType)? SqlTypeMap[column.DataType]: column.DataType; 
 
-                var type = (Type)row["DataType"];
-                var name = TypeAliases.ContainsKey(type) ? TypeAliases[type] : type.Name;
-                var isNullable = (bool)row["AllowDBNull"] && NullableTypes.Contains(type);
-                var collumnName = (string)row["ColumnName"];
-                var isKey = (bool)row["IsKey"] && NullableTypes.Contains(type);
-                if(isKey) builder.AppendLine("\t[Key]");
-                builder.AppendLine(string.Format("\tpublic {0}{1} {2} {{ get; set; }}", name, isNullable ? "?" : string.Empty, collumnName));
-                builder.AppendLine();
+                var isNullable = column.IsNullable == "YES" && NullableTypes.Contains(typeName); 
+                var collumnName = column.ColumnName;
+                //var isKey = column.key && NullableTypes.Contains(typeName);
+                //if(isKey) builder.AppendLine("\t[Key]");
+                builder.AppendLine(string.Format("\tpublic {0}{1} {2} {{ get; set; }}", typeName, isNullable ? "?" : string.Empty, collumnName));
+                //builder.AppendLine();
             }
 
             builder.AppendLine("}");
@@ -226,15 +253,49 @@ FROM INFORMATION_SCHEMA.TABLES";
             { typeof(string), "string" }
         };
 
-        private static readonly HashSet<Type> NullableTypes = new HashSet<Type> {
-            typeof(int),
-            typeof(short),
-            typeof(long),
-            typeof(double),
-            typeof(decimal),
-            typeof(float),
-            typeof(bool),
-            typeof(DateTime)
+        private static readonly Dictionary<string, string> SqlTypeMap = new Dictionary<string, string>
+        {
+            {"bigint", "int" },
+            {"binary", "byte[]" },
+            {"bit", "bool" },
+            {"char", "string" },
+            {"date", "DateTime" },
+            {"datetime", "DateTime" },
+            {"datetime2", "DateTime" },
+            {"DATETIMEOFFSET", "DateTimeOffset" },
+            {"decimal", "decimal" },
+            {"float", "double" },
+            {"int", "int" },
+            {"money", "decimal" },
+            {"nchar", "string" },
+            {"ntext", "string" },
+            {"numeric", "decimal" },
+            {"nvarchar", "string" },
+            {"real", "Single" },
+            {"rowversion", "byte[]" },
+            {"smallint", "int" },
+            {"smallmoney", "decimal" },
+            {"sql_variant", "Object" },
+            {"text", "string" },
+            {"time", "TimeSpan" },
+            {"tinyint", "byte[]" },
+            {"uniqueidentifier", "Guid" },
+            {"varbinary", "byte[]" },
+            {"image", "byte[]" },
+            {"varbinary, binary(1)", "byte[]" },
+            {"varchar", "string" },
+            {"xml", "string" }
+        };
+
+        private static readonly HashSet<string> NullableTypes = new HashSet<string> {
+            "int",
+            "short",
+            "long",
+            "double",
+            "decimal",
+            "float",
+            "bool",
+            "DateTime"
         };
     }
 }

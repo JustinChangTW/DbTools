@@ -109,7 +109,7 @@ namespace DbTools.Utils
                 return GetList<T>(sqlString);
             }
 
-            return GetList<T>(sqlString, param);
+            return GetList<T>(sqlString, param, CommandType.Text, 180);
         }
 
 

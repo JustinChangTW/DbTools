@@ -7,22 +7,30 @@
                 <input type="text"  class="form-control" id="filter" placeholder="過濾資料表" v-model="filter">
             </div>
         </form>
+        <div class="h">
+
+        </div>
         <table class="table table-bordered  table-hover">
             <thead>
                 <tr>
                     <th class="text-center"><input type="checkbox" name="all" v-model="form.checkedAll" @click="checkedAll"></th>
                     <th class="text-center">資料庫名稱</th>
-                    <th class="text-center">表格名稱</th>
+                    <th class="text-center">資料表名稱</th>
+                    <th class="text-center">資料表描述</th>
+                    <th class="text-center">資料表類型</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="table in filterTables" :key="table.id">
                     <td class="text-center"><input type="checkbox" v-model="table.check"> </td>
-                    <td>{{table.dbName}}</td>
+                    <td>{{table.tableCatalog}}</td>
                     <td>{{table.tableSchema+'.'+table.tableName}}</td>
+                    <td>{{table.description}}</td>
+                    <td>{{table.tableType}}</td>
                 </tr>
             </tbody>
         </table>
+        <div class="h-10"></div>
         <ChangTabsButton :canNextPage='canNextPage' @previous="previous" @next="next" ></ChangTabsButton>
     </div>
 </template>
@@ -106,5 +114,13 @@
 </script>
 
 <style scoped>
-
+    .h-10 {
+        height: 10% !important;
+    }
+    .h-20 {
+        height: 20% !important;
+    }
+    .h-30 {
+        height: 30% !important;
+    }
 </style>

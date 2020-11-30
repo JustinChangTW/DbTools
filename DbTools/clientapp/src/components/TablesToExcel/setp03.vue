@@ -38,25 +38,18 @@
         methods:{
             exportFile() {
                 let stepData = this.stepData
-                let form = this.form
+                //let form = this.form
                 console.log(stepData)
                 this.$emit("loading")
                 axios.post('/api/ExportFile', stepData, { responseType: 'blob' })
-                .then(function (response) {
-                    form.tables = response.data
+                .then((response) => {
+                    //form.tables = response.data
                     let blob = response.data
                     let reader = new FileReader()
                     reader.readAsDataURL(blob)
                     reader.onload = (e) => {
-                        let a = document.createElement('a')
-                        var today = new Date();
-                        today.toISOString().substring(0, 10);
-                        a.download = stepData.dbName +'-'+ moment().format('YYYYMMDDHHmmss') +'.xlsx' //filename
-                        a.href = e.target.result
-                        document.body.appendChild(a)
-                        a.click()
-                        document.body.removeChild(a)
-                    } 
+                        downlogFile(stepData, e.target, 'xlsx')
+                    }
 
                 })
                 .catch(function (error) {
@@ -69,65 +62,50 @@
             },
             exportInsert() {
                 let stepData = this.stepData
-                let form = this.form
+                //let form = this.form
                 console.log(stepData)
                 this.$emit("loading")
                 axios.post('/api/ExportInsert', stepData, { responseType: 'blob' })
-                    .then(function (response) {
-                        form.tables = response.data
-                        let blob = response.data
-                        let reader = new FileReader()
-                        reader.readAsDataURL(blob)
-                        reader.onload = (e) => {
-                            let a = document.createElement('a')
-                            var today = new Date();
-                            today.toISOString().substring(0, 10);
-                            a.download = stepData.dbName + '-' + moment().format('YYYYMMDDHHmmss') + '.txt' //filename
-                            a.href = e.target.result
-                            document.body.appendChild(a)
-                            a.click()
-                            document.body.removeChild(a)
-                        }
+                .then((response)=> {
+                    //form.tables = response.data
+                    let blob = response.data
+                    let reader = new FileReader()
+                    reader.readAsDataURL(blob)
+                    reader.onload = (e) => {
+                        downlogFile(stepData, e.target, 'txt')
+                    }
 
-                    })
-                    .catch(function (error) {
-                        console.log(error)
-                        alert(error)
-                    }).finally(() => {
-                        console.log(this)
-                        this.$emit("loaded")
-                    });
+                })
+                .catch(function (error) {
+                    console.log(error)
+                    alert(error)
+                }).finally(() => {
+                    console.log(this)
+                    this.$emit("loaded")
+                });
             },
             exportEntityClass() {
                 let stepData = this.stepData
-                let form = this.form
+                //let form = this.form
                 console.log(stepData)
                 this.$emit("loading")
                 axios.post('/api/ExportEntityClass', stepData, { responseType: 'blob' })
-                    .then(function (response) {
-                        form.tables = response.data
-                        let blob = response.data
-                        let reader = new FileReader()
-                        reader.readAsDataURL(blob)
-                        reader.onload = (e) => {
-                            let a = document.createElement('a')
-                            var today = new Date();
-                            today.toISOString().substring(0, 10);
-                            a.download = stepData.dbName + '-' + moment().format('YYYYMMDDHHmmss') + '.txt' //filename
-                            a.href = e.target.result
-                            document.body.appendChild(a)
-                            a.click()
-                            document.body.removeChild(a)
-                        }
-
-                    })
-                    .catch(function (error) {
-                        console.log(error)
-                        alert(error)
-                    }).finally(() => {
-                        console.log(this)
-                        this.$emit("loaded")
-                    });
+                .then((response) => {
+                    //form.tables = response.data
+                    let blob = response.data
+                    let reader = new FileReader()
+                    reader.readAsDataURL(blob)
+                    reader.onload = (e) => {
+                        downlogFile(stepData, e.target, 'txt')
+                    }
+                })
+                .catch((error)=> {
+                    console.log(error)
+                    alert(error)
+                }).finally(() => {
+                    console.log(this)
+                    this.$emit("loaded")
+                });
             },
             previous:function(){
                 this.$emit('previous', this.form);
@@ -139,7 +117,17 @@
                 this.$emit('next',  this.form);
             }
         },
-}
+    }
+
+    var downlogFile = function (stepData, target, fileType) {
+        console.log(stepData, fileType)
+        let a = document.createElement('a')
+        a.download = stepData.dbName + '-' + moment().format('YYYYMMDDHHmmss') + '.' + fileType //filename
+        a.href = target.result
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    }
 </script>
 
 <style scoped>
