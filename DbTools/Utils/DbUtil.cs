@@ -76,8 +76,9 @@ namespace DbTools.Utils
         {
             _logger.LogInformation($@"GetList sqlString={sqlString}");
             var list = new List<T>();
-            using (var db = _connection as DbConnection)
-            {
+            var db = _connection as DbConnection;
+            //using ()
+            //{
                 IEnumerable<T> ts = null;
                 if (null == param)
                 {
@@ -91,7 +92,7 @@ namespace DbTools.Utils
                 {
                     list = ts.AsList();
                 }
-            }
+            //}
 
             return list;
         }

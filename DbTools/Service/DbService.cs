@@ -132,7 +132,11 @@ SELECT
             FROM sys.extended_properties ex 
             WHERE OBJECT_ID(TABLE_NAME) = ex.major_id AND ex.minor_id=0 AND  name = 'MS_Description'),TABLE_NAME) N'Description'
 FROM INFORMATION_SCHEMA.TABLES";
-            return _dbUtil.GetList<TableModel>(sql);
+
+            var tables = _dbUtil.GetList<TableModel>(sql);
+            tables.ForEach(x => x.Columns = GetColumns(x)??new List<ColumnsModel>());
+            tables.ForEach(x => x.TableConstraints = GetTableConstraints(x) ?? new List<TableConstraintModel>());
+            return tables.ToList();
 
         }
 
@@ -157,6 +161,44 @@ SELECT
 from INFORMATION_SCHEMA.COLUMNS 
 WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME = @TableName";
             return _dbUtil.GetList<ColumnsModel>(sql, table);
+        }
+
+        public List<TableConstraintModel> GetTableConstraints(TableModel table)
+        {
+            var sql = $@"
+SELECT 
+    CONSTRAINT_CATALOG ConstraintCatalog,
+    CONSTRAINT_SCHEMA ConstraintSchema,
+    CONSTRAINT_NAME ConstraintName,
+    TABLE_CATALOG TableCatalog,
+    TABLE_SCHEMA TableSchema,
+    TABLE_NAME TableName,
+    CONSTRAINT_TYPE ConstraintType,
+    IS_DEFERRABLE IsDeferrable,
+    INITIALLY_DEFERRED InitiallyDeferred
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME = @TableName";
+            var tableConstraints = _dbUtil.GetList<TableConstraintModel>(sql, table);
+            tableConstraints.ForEach(x => x.KeyColumnUsages = GetKeyColumnUsages(x)??new List<KeyColumnUsageModel>());
+            return tableConstraints;
+        }
+
+
+        public List<KeyColumnUsageModel> GetKeyColumnUsages(TableConstraintModel tableConstraint)
+        {
+            var sql = $@"
+SELECT 
+    CONSTRAINT_CATALOG ConstraintCatalog ,
+    CONSTRAINT_SCHEMA ConstraintSchema ,
+    CONSTRAINT_NAME  ConstraintName,
+    TABLE_CATALOG  TableCatalog,
+    TABLE_SCHEMA  TableSchema,
+    TABLE_NAME  TableName,
+    COLUMN_NAME  ColumnName,
+    ORDINAL_POSITION  OrdinalPosition
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME = @TableName AND CONSTRAINT_NAME = @ConstraintName ";
+            return _dbUtil.GetList<KeyColumnUsageModel>(sql, tableConstraint);
         }
 
 
@@ -190,10 +232,10 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
         public MemoryStream GetTableDataToEntityClass(StepDataModel form)
         {
             
-            return ExportEntityClass(form, x => GetColumns(x));
+            return ExportEntityClass(form);
         }
 
-        private MemoryStream ExportEntityClass(StepDataModel form, Func<TableModel, List<ColumnsModel>> func)
+        private MemoryStream ExportEntityClass(StepDataModel form)
         {
             var stream = new MemoryStream();
 
@@ -203,8 +245,7 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
                 {
                     if (ConnectionTest(form))
                     {
-                        var data = func(table);
-                        sw.Write(GenEntityClass(data));
+                        sw.Write(GenEntityClass(table));
                     }
                 }
             }
@@ -213,10 +254,10 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
            return stream;
         }
 
-        private  string GenEntityClass(List<ColumnsModel> columns)
+        private  string GenEntityClass(TableModel table)
         {
             var builder = new StringBuilder();
-            foreach (var column in columns)
+            foreach (var column in table.Columns)
             {
                 if (string.IsNullOrWhiteSpace(builder.ToString()))
                 {
@@ -229,10 +270,10 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
 
                 var isNullable = column.IsNullable == "YES" && NullableTypes.Contains(typeName); 
                 var collumnName = column.ColumnName;
-                //var isKey = column.key && NullableTypes.Contains(typeName);
-                //if(isKey) builder.AppendLine("\t[Key]");
+                var pks = table.TableConstraints.FirstOrDefault(x => x.ConstraintType == "PRIMARY KEY").
+                                KeyColumnUsages.FirstOrDefault(x=>x.ColumnName==column.ColumnName);
+                if(pks!=null) builder.AppendLine($"\t[Key, Column(Order={pks.OrdinalPosition})]");
                 builder.AppendLine(string.Format("\tpublic {0}{1} {2} {{ get; set; }}", typeName, isNullable ? "?" : string.Empty, collumnName));
-                //builder.AppendLine();
             }
 
             builder.AppendLine("}");
