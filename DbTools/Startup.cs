@@ -23,7 +23,7 @@ namespace DbTools
             services.AddControllers();
             services.AddSpaStaticFiles(configuration =>
             {
-                configuration.RootPath = "ClientApp";
+                configuration.RootPath = "wwwroot";
             });
             services.AddDependencyInjection(); //ª`¤J
         }
