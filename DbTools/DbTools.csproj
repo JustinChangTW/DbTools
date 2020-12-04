@@ -18,6 +18,12 @@
     <PackageReference Include="VueCliMiddleware" Version="3.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="clientapp\public\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="cd ClientApp&#xD;&#xA;npm run build&#xD;&#xA;iisreset /STOP" />
   </Target>
