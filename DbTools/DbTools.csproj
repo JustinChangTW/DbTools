@@ -14,6 +14,7 @@
     </PackageReference>
     <PackageReference Include="MySql.Data" Version="8.0.22" />
     <PackageReference Include="NETCore.Encrypt" Version="2.0.9" />
+    <PackageReference Include="Scriban" Version="3.0.5" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="VueCliMiddleware" Version="3.0.0" />
   </ItemGroup>
@@ -25,11 +26,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="cd ClientApp&#xD;&#xA;npm run build&#xD;&#xA;iisreset /STOP" />
-  </Target>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="iisreset /START" />
+    <Exec Command="cd ClientApp&#xD;&#xA;npm run build&#xD;&#xA;" />
   </Target>
 
 

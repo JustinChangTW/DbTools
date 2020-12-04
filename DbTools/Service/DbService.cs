@@ -2,6 +2,7 @@
 using DbTools.Extensions;
 using DbTools.Utils;
 using DbTools.ViewModel;
+using Scriban;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -256,29 +257,33 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
 
         private  string GenEntityClass(TableModel table)
         {
-            var builder = new StringBuilder();
-            foreach (var column in table.Columns)
+            var columns = table.Columns.Select(x => new
             {
-                if (string.IsNullOrWhiteSpace(builder.ToString()))
-                {
-                    var tableName = column.TableName;
-                    builder.AppendFormat("public class {0}{1}", tableName, Environment.NewLine);
-                    builder.AppendLine("{");
-                }
+                x.TableName,
+                x.ColumnName,
 
-                var typeName = SqlTypeMap.ContainsKey(column.DataType)? SqlTypeMap[column.DataType]: column.DataType; 
+                TypeName = SqlTypeMap.ContainsKey(x.DataType) ? SqlTypeMap[x.DataType] : x.DataType,
+                IsNull = x.IsNullable == "YES" && NullableTypes.Contains(SqlTypeMap.ContainsKey(x.DataType) ? SqlTypeMap[x.DataType] : x.DataType),
+                Key = table.TableConstraints.FirstOrDefault(y => y.ConstraintType == "PRIMARY KEY").
+                                 KeyColumnUsages.FirstOrDefault(y => y.ColumnName == x.ColumnName)
 
-                var isNullable = column.IsNullable == "YES" && NullableTypes.Contains(typeName); 
-                var collumnName = column.ColumnName;
-                var pks = table.TableConstraints.FirstOrDefault(x => x.ConstraintType == "PRIMARY KEY").
-                                KeyColumnUsages.FirstOrDefault(x=>x.ColumnName==column.ColumnName);
-                if(pks!=null) builder.AppendLine($"\t[Key, Column(Order={pks.OrdinalPosition})]");
-                builder.AppendLine(string.Format("\tpublic {0}{1} {2} {{ get; set; }}", typeName, isNullable ? "?" : string.Empty, collumnName));
-            }
+            });
 
-            builder.AppendLine("}");
-            builder.AppendLine();
-            return builder.ToString();
+
+            var template = Template.Parse(
+@"public class {{table_name}}
+{
+{{~ for column in columns ~}}
+    {{~if column.key~}}
+    [Key, Column(Order={{column.key.ordinal_position}})]
+    {{~end~}}
+    public {{column.type_name}}{{if column.is_null}}?{{end}} {{column.column_name}} { get; set; }
+{{~end~}}
+}
+            ");
+            return template.Render(new { 
+                columns,
+                table.TableName});
         }
 
         private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string> {
