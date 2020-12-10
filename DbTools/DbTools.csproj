@@ -25,6 +25,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Template\" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="cd ClientApp&#xD;&#xA;npm run build&#xD;&#xA;" />
   </Target>

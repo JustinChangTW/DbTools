@@ -15,10 +15,12 @@ namespace DbTools.Service
     public class DbService : IDbService
     {
         private readonly IDbUtil _dbUtil;
+        private readonly ITemplateService _templateService;
 
-        public DbService(IDbUtil dbUtil)
+        public DbService(IDbUtil dbUtil,ITemplateService templateService) 
         {
             _dbUtil = dbUtil;
+            _templateService = templateService;
         }
         public bool ConnectionTest(DbConnectionModel form)
         {
@@ -269,21 +271,13 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
 
             });
 
-
-            var template = Template.Parse(
-@"public class {{table_name}}
-{
-{{~ for column in columns ~}}
-    {{~if column.key~}}
-    [Key, Column(Order={{column.key.ordinal_position}})]
-    {{~end~}}
-    public {{column.type_name}}{{if column.is_null}}?{{end}} {{column.column_name}} { get; set; }
-{{~end~}}
-}
-            ");
-            return template.Render(new { 
+            var classTemplate = File.ReadAllText(@"Template/ClassTemplate.Scriban");
+            
+            return _templateService.Render(classTemplate, new
+            {
                 columns,
-                table.TableName});
+                table.TableName
+            });
         }
 
         private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string> {

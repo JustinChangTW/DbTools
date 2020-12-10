@@ -1,0 +1,9 @@
+public class {{table_name}}
+{
+{{~ for column in columns ~}}
+    {{~if column.key~}}
+    [Key, Column(Order={{column.key.ordinal_position}})]
+    {{~end~}}
+    public {{column.type_name}}{{if column.is_null}}?{{end}} {{column.column_name}} { get; set; }
+{{~end~}}
+}
