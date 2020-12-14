@@ -30,6 +30,9 @@ namespace DbTools.ViewModel
         public long CharacterMaximumLength { get; set; }
         public long CharacterOctetLength { get; set; }
         public string CharacterSetName { get; set; }
+        public int NumericPrecision { get; set; }
+	    public int NumericPresionRadix { get; set; } 
+	    public int NumericScale { get; set; }    
         public string CollationName { get; set; }
         public string Description { get; set; } 
     }

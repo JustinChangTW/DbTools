@@ -1,9 +1,23 @@
-public class {{table_name}}
+[Table("{{table_name}}")]
+public class {{table_name_map}}
 {
 {{~ for column in columns ~}}
     {{~if column.key~}}
     [Key, Column(Order={{column.key.ordinal_position}})]
     {{~end~}}
-    public {{column.type_name}}{{if column.is_null}}?{{end}} {{column.column_name}} { get; set; }
+    [Column("{{column.column_name}}")]
+    {{~if column.description~}}
+    [Display(Name = "{{column.description}}")]
+    {{~end~}}
+    {{~if column.is_nullable!="YES"~}}
+    [Required]
+    {{~end~}}
+    {{~if column.data_type=="char" || column.data_type=="nchar"|| column.data_type=="varchar"|| column.data_type=="nvarchar"~}}
+    [StringLength({{column.character_maximum_length}})]
+    {{~end~}}
+    {{~if column.data_type=="decimal"~}}
+    [DecimalPrecision({{column.numeric_precision}},{{column.numeric_scale}})]
+    {{~end~}}
+    public {{column.type_name}}{{if column.is_null}}?{{end}} {{column.column_name_map}} { get; set; }
 {{~end~}}
 }

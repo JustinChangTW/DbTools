@@ -157,11 +157,14 @@ SELECT
 	CHARACTER_MAXIMUM_LENGTH CharacterMaximumLength,
 	CHARACTER_OCTET_LENGTH CharacterOctetLength,
 	CHARACTER_SET_NAME CharacterSetName,
+	NUMERIC_PRECISION NumericPrecision,
+	NUMERIC_PRECISION_RADIX NumericPrecisionRadix,
+	NUMERIC_SCALE NumericScale,
 	COLLATION_CATALOG CollationName,
 	ISNULL((SELECT TOP(1) ex.value 
 			FROM sys.extended_properties ex 
 			WHERE OBJECT_ID(TABLE_NAME) = ex.major_id AND ex.minor_id=ORDINAL_POSITION AND  name = 'MS_Description'),COLUMN_NAME) N'Description'
-from INFORMATION_SCHEMA.COLUMNS 
+from INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME = @TableName";
             return _dbUtil.GetList<ColumnsModel>(sql, table);
         }
@@ -263,7 +266,13 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
             {
                 x.TableName,
                 x.ColumnName,
-
+                x.DataType,
+                x.IsNullable,
+                x.Description,
+                x.CharacterMaximumLength,
+                x.NumericPrecision,
+                x.NumericScale,
+                ColumnNameMap = x.ColumnName.ToPascalCase(),
                 TypeName = SqlTypeMap.ContainsKey(x.DataType) ? SqlTypeMap[x.DataType] : x.DataType,
                 IsNull = x.IsNullable == "YES" && NullableTypes.Contains(SqlTypeMap.ContainsKey(x.DataType) ? SqlTypeMap[x.DataType] : x.DataType),
                 Key = table.TableConstraints.FirstOrDefault(y => y.ConstraintType == "PRIMARY KEY").
@@ -276,8 +285,15 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
             return _templateService.Render(classTemplate, new
             {
                 columns,
-                table.TableName
+                table.TableName,
+                TableNameMap=table.TableName.ToPascalCase()
             });
+        }
+
+        //
+        private string TranColumnNameMap(string collationName)
+        {
+            return collationName.ToPascalCase();
         }
 
         private static readonly Dictionary<Type, string> TypeAliases = new Dictionary<Type, string> {
@@ -338,4 +354,5 @@ WHERE TABLE_CATALOG=@TableCatalog AND TABLE_SCHEMA=@TableSchema AND TABLE_NAME =
             "DateTime"
         };
     }
+
 }
